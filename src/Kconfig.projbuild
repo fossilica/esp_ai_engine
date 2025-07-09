@@ -1,0 +1,20 @@
+menu  "ESP AI Engine"
+  choice
+    prompt "Log Severity"
+    default ESP_AI_ENGINE_LOGGER_SEVERITY_NONE
+    config ESP_AI_ENGINE_LOGGER_SEVERITY_VERBOSE
+      bool "VERBOSE"
+    config ESP_AI_ENGINE_LOGGER_SEVERITY_DEBUG
+      bool "DEBUG"
+    config ESP_AI_ENGINE_LOGGER_SEVERITY_INFO
+      bool "INFO"
+    config ESP_AI_ENGINE_LOGGER_SEVERITY_WARN
+      bool "WARN"
+    config ESP_AI_ENGINE_LOGGER_SEVERITY_ERROR
+      bool "ERROR"
+    config ESP_AI_ENGINE_LOGGER_SEVERITY_FATAL
+      bool "FATAL"
+    config ESP_AI_ENGINE_LOGGER_SEVERITY_NONE
+      bool "NONE"
+  endchoice
+endmenu
