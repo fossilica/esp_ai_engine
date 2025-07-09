@@ -96,9 +96,7 @@ class EngineImpl : public Engine {
   esp_websocket_client_handle_t web_socket_client_ = nullptr;
   std::shared_ptr<AudioInputEngine> audio_input_engine_;
   std::shared_ptr<AudioOutputEngine> audio_output_engine_;
-  std::string websocket_url_;
   std::string api_key_;
-  std::map<std::string, std::string> websocket_headers_;
   TaskQueue main_task_queue_;
   std::unique_ptr<TaskQueue> transmit_queue_;
   std::string tts_task_id_;

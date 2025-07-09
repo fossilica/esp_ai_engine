@@ -1,0 +1,48 @@
+name: ESP-IDF Build
+
+on:
+  push:
+    branches: ["main", "v*"]
+  pull_request:
+    branches: ["main", "v*"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+        - app_path: examples/esp32/ai_voice
+          target: esp32
+        
+        - app_path: examples/esp32/ai_voice_display_lcd
+          target: esp32
+        
+        - app_path: examples/esp32/ai_voice_display_oled
+          target: esp32
+        
+        - app_path: examples/esp32s3/ai_voice
+          target: esp32s3
+        
+        - app_path: examples/esp32s3/ai_voice_display_lcd
+          target: esp32s3
+        
+        - app_path: examples/esp32s3/ai_voice_display_oled
+          target: esp32s3
+        
+        - app_path: examples/ai_vox_board/ai_vox_board
+          target: esp32s3
+    
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+    - name: build
+      uses: espressif/esp-idf-ci-action@v1
+      with:
+        esp_idf_version: v5.4.1
+        target: ${{matrix.target}}
+        command: |
+          idf.py -DAPP_PATH="${{matrix.app_path}}" set-target ${{matrix.target}}
+          idf.py build

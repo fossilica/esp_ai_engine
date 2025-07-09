@@ -9,12 +9,6 @@
 
 #include "clogger/clogger.h"
 
-#ifdef ARDUINO
-#include "libopus/opus.h"
-#else
-#include "opus.h"
-#endif
-
 namespace {
 constexpr size_t kMaxOpusPacketSize = 1500;
 constexpr uint32_t kFrameDuration = 100;  // ms
@@ -44,7 +38,6 @@ AudioInputEngine::AudioInputEngine(std::shared_ptr<esp_ai::AudioInputDevice> aud
 AudioInputEngine::~AudioInputEngine() {
   delete task_queue_;
   audio_input_device_->Close();
-  opus_encoder_destroy(opus_encoder_);
   CLOGD("OK");
 }
 

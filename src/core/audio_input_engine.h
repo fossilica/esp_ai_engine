@@ -14,7 +14,6 @@
 #include "flex_array/flex_array.h"
 #include "task_queue/task_queue.h"
 
-struct OpusDecoder;
 class AudioInputEngine {
  public:
   using DataHandler = std::function<void(FlexArray<int16_t> &&)>;
@@ -26,7 +25,6 @@ class AudioInputEngine {
 
   DataHandler const handler_;
   std::shared_ptr<esp_ai::AudioInputDevice> audio_input_device_;
-  struct OpusEncoder *opus_encoder_ = nullptr;
   TaskQueue *task_queue_ = nullptr;
 };
 
