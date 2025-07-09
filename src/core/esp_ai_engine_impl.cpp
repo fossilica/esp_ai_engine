@@ -13,9 +13,9 @@
 #include <esp_crt_bundle.h>
 #include <esp_http_client.h>
 #include <esp_mac.h>
+#include <esp_timer.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
-#include <esp_timer.h>
 
 #include "audio_input_engine.h"
 #include "audio_output_engine.h"
@@ -59,12 +59,7 @@ EngineImpl &EngineImpl::GetInstance() {
   return *s_instance;
 }
 
-EngineImpl::EngineImpl()
-    : websocket_url_("wss://api.tenclass.net/xiaozhi/v1/"),
-      websocket_headers_{
-          {"Authorization", "Bearer test-token"},
-      },
-      main_task_queue_("AiVoxMain", 1024 * 4, tskIDLE_PRIORITY + 1) {
+EngineImpl::EngineImpl() : main_task_queue_("EngineMain", 1024 * 4, tskIDLE_PRIORITY + 1) {
   CLOGD();
 }
 
@@ -491,7 +486,7 @@ void EngineImpl::StartListening() {
 
   audio_input_engine_.reset();
   audio_output_engine_.reset();
-  transmit_queue_ = std::make_unique<TaskQueue>("AiVoxTransmit", 1024 * 3, tskIDLE_PRIORITY + 1);
+  transmit_queue_ = std::make_unique<TaskQueue>("EngineTransmit", 1024 * 3, tskIDLE_PRIORITY + 1);
   audio_input_engine_ = std::make_shared<AudioInputEngine>(audio_input_device_, [this](FlexArray<int16_t> &&data) mutable {
     if (heap_caps_get_total_size(MALLOC_CAP_SPIRAM) == 0 && transmit_queue_->Size() > 5) {
       return;

@@ -29,5 +29,5 @@ jobs:
       - name: Install Packages
         run: pio pkg install -e ${{matrix.target}}
 
-      - name: Build PlatformIO Project
+      - name: Build
         run: pio run -e ${{matrix.target}}

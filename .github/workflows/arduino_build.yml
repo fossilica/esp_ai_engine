@@ -1,0 +1,85 @@
+name: Arduino Build
+
+on:
+  push:
+    branches: ["main", "v*"]
+  pull_request:
+    branches: ["main", "v*"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      LIB_DIR_NAME: ESP_AI_Engine
+      ARDUINO_CLI_DIR: ${{github.workspace}}/arduino_cli
+      ARDUINO_CLI_CONFIG_DIR: ${{github.workspace}}/arduino_cli_config
+      ARDUINO_USER_DIR: ${{github.workspace}}/arduino_user
+    strategy:
+      matrix:
+        include:
+            - example: esp32/ai_voice
+              fqbn: esp32:esp32:esp32
+              board_options: "PartitionScheme=huge_app"
+              libs: null
+
+            - example: esp32/ai_voice_display_lcd
+              fqbn: esp32:esp32:esp32
+              board_options: "PartitionScheme=huge_app"
+              libs: "lvgl@9.2.2"
+
+            - example: esp32/ai_voice_display_oled
+              fqbn: esp32:esp32:esp32
+              board_options: "PartitionScheme=huge_app"
+              libs: "lvgl@9.2.2"
+
+            - example: esp32s3/ai_voice
+              fqbn: esp32:esp32:esp32s3
+              board_options: "PartitionScheme=custom,PSRAM=opi,FlashSize=16M"
+              libs: null
+            
+            - example: esp32s3/ai_voice_display_lcd
+              fqbn: esp32:esp32:esp32s3
+              board_options: "PartitionScheme=custom,PSRAM=opi,FlashSize=16M"
+              libs: "lvgl@9.2.2"
+
+            - example: esp32s3/ai_voice_display_oled
+              fqbn: esp32:esp32:esp32s3
+              board_options: "PartitionScheme=custom,PSRAM=opi,FlashSize=16M"
+              libs: "lvgl@9.2.2"
+            
+            - example: ai_vox_board/ai_vox_board
+              fqbn: esp32:esp32:esp32s3
+              board_options: "PartitionScheme=custom,PSRAM=opi,FlashSize=16M"
+              libs: "lvgl@9.2.2"
+    steps:
+      - name: Download arduino cli
+        run: curl -L -o arduino-cli.tar.gz https://github.com/arduino/arduino-cli/releases/download/v1.2.0/arduino-cli_1.2.0_Linux_64bit.tar.gz
+      - name: install arduino cli
+        run: |
+          mkdir -p ${ARDUINO_CLI_DIR}
+          tar -zxvf arduino-cli.tar.gz -C ${ARDUINO_CLI_DIR}
+      - name: Setup arduino-cli
+        run: |
+          ${ARDUINO_CLI_DIR}/arduino-cli --config-dir ${ARDUINO_CLI_CONFIG_DIR} config init
+          ${ARDUINO_CLI_DIR}/arduino-cli --config-dir ${ARDUINO_CLI_CONFIG_DIR} config set directories.user ${ARDUINO_USER_DIR}
+          ${ARDUINO_CLI_DIR}/arduino-cli --config-dir ${ARDUINO_CLI_CONFIG_DIR} config set library.enable_unsafe_install true
+          ${ARDUINO_CLI_DIR}/arduino-cli --config-dir ${ARDUINO_CLI_CONFIG_DIR} config dump
+          ${ARDUINO_CLI_DIR}/arduino-cli --config-dir ${ARDUINO_CLI_CONFIG_DIR} core install esp32:esp32@3.2.0
+      - name: Install Libs
+        if: ${{ matrix.libs != null }}
+        run: |
+          ${ARDUINO_CLI_DIR}/arduino-cli --config-dir ${ARDUINO_CLI_CONFIG_DIR} lib install ${{ matrix.libs }}
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          path: esp_ai_engine
+      - name: Zip ESP AI Engine
+        run: |
+          zip -r esp_ai_engine.zip esp_ai_engine
+      - name: Install Lib ESP AI Engine
+        run: |
+          ${ARDUINO_CLI_DIR}/arduino-cli --config-dir ${ARDUINO_CLI_CONFIG_DIR} lib install --zip-path esp_ai_engine.zip
+      - name: Build
+        run: |
+          echo "compile ${ARDUINO_USER_DIR}/libraries/${LIB_DIR_NAME}/examples/${{matrix.example}}"
+          ${ARDUINO_CLI_DIR}/arduino-cli --config-dir ${ARDUINO_CLI_CONFIG_DIR} compile --fqbn "${{matrix.fqbn}}" "${ARDUINO_USER_DIR}/libraries/${LIB_DIR_NAME}/examples/${{matrix.example}}" -j 0 --warnings all --board-options "${{ matrix.board_options }}" --build-property "build.extra_flags=-Wall -Werror" --log --clean -v

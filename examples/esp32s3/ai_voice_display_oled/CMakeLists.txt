@@ -14,7 +14,8 @@ target_compile_definitions(
   PRIVATE
   LV_LVGL_H_INCLUDE_SIMPLE=1
   PRINT_HEAP_INFO_INTERVAL=1000
-  WIFI_SSID="emakefun"
-  WIFI_PASSWORD="501416wf"
-  ESP_AI_API_KEY="f056f7d2494e4ca8be0851a2fcecfd50"
+  # Debug
+  # PRINT_HEAP_INFO_INTERVAL=1000
+  # WIFI_SSID="emakefun"
+  # WIFI_PASSWORD="501416wf"
 )
